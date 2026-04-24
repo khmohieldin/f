@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مُحلل فيسبوك الاحترافي</title>
+    
+    <!-- Tailwind CSS للواجهة -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- خط القاهرة -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen p-4 md:p-8 selection:bg-indigo-500/30">
+
+    <!-- النافذة المنبثقة الخارجية للمفتاح -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center backdrop-blur-sm px-4">
+        <div class="bg-slate-900 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md overflow-hidden transform transition-all">
+            <div class="border-b border-slate-800 px-5 py-4 flex justify-between items-center bg-slate-900/50">
+                <h3 class="font-bold text-slate-200 text-lg flex items-center">
+                    <i class="fa-solid fa-key text-indigo-400 ml-2"></i> إعدادات الذكاء الاصطناعي
+                </h3>
+                <button onclick="closeSettingsModal()" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center transition text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-300 mb-2">مفتاح API الخاص بك (من Google AI Studio):</label>
+                    <input type="password" id="apiKeyValue" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none focus:border-indigo-500 transition">
+                    <p class="text-xs text-slate-500 mt-2">يتم حفظ المفتاح في متصفحك الحالي فقط لضمان الأمان.</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">إصدار نموذج الذكاء الاصطناعي:</label>
+                    <select id="aiModelValue" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none focus:border-indigo-500 transition cursor-pointer appearance-none">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (الأحدث والأسرع)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (مستقر)</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (إصدار أقدم)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (إصدار أقدم)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 p-4 flex justify-end bg-slate-900/50">
+                <button onclick="saveApiKey()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-2.5 rounded-xl font-bold transition flex items-center shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-check ml-2"></i> حفظ والبدء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto space-y-6 relative">
+        
+        <!-- Header -->
+        <div class="glass-panel rounded-3xl p-6 shadow-2xl border border-slate-800 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500"></div>
+            
+            <!-- زر الإعدادات -->
+            <button onclick="openSettingsModal()" class="absolute top-4 left-4 w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center transition border border-slate-700 shadow-md" title="إعدادات المفتاح">
+                <i class="fa-solid fa-gear text-slate-300"></i>
+            </button>
+
+            <div class="flex justify-center mb-4 mt-2">
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700 shadow-inner">
+                    <i class="fa-brands fa-facebook text-3xl text-blue-500"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 mb-3">
+                مُحلل فيسبوك الاحترافي
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base max-w-lg mx-auto leading-relaxed">
+                اكتب أفكارك وسنحولها لمحتوى تسويقي جذاب ومطابق لخوارزميات فيسبوك بضغطة زر.
+            </p>
+        </div>
+
+        <!-- Image Watermark Section -->
+        <div class="bg-slate-900 rounded-3xl p-5 md:p-8 shadow-xl border border-slate-800">
+            <h3 class="text-xl font-bold text-indigo-400 mb-4 flex items-center">
+                <i class="fa-regular fa-image ml-2"></i> ختم الصور التلقائي
+            </h3>
+            <p class="text-sm text-slate-400 mb-6">ارفع صورة ليتم إضافة رابط صفحتك كعلامة مائية أسفلها تلقائياً مع شعار فيسبوك.</p>
+
+            <!-- Upload Input -->
+            <div class="mb-4">
+                <input type="file" id="imageInput" accept="image/*" class="hidden">
+                <label for="imageInput" class="cursor-pointer w-full flex flex-col items-center justify-center py-8 border-2 border-dashed border-slate-700 rounded-2xl hover:border-indigo-500 hover:bg-slate-800/50 transition">
+                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
+                    <span class="text-slate-300 font-bold text-lg">اضغط لرفع صورة</span>
+                    <span class="text-slate-500 text-sm mt-1">PNG, JPG, JPEG</span>
+                </label>
+            </div>
+
+            <!-- Preview & Download -->
+            <div id="imagePreviewContainer" class="hidden flex flex-col items-center space-y-4 mt-6">
+                <div class="relative w-full flex justify-center bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    <canvas id="watermarkCanvas" class="max-w-full max-h-[500px] rounded-xl shadow-lg"></canvas>
+                </div>
+                <button onclick="downloadImage()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-md transition flex items-center justify-center">
+                    <i class="fa-solid fa-download ml-2"></i> تحميل الصورة النهائية
+                </button>
+            </div>
+        </div>
+
+        <!-- Input & Settings Section -->
+        <div class="bg-slate-900 rounded-3xl p-5 md:p-8 shadow-xl border border-slate-800">
+            <h3 class="text-xl font-bold text-indigo-400 mb-6 flex items-center">
+                <i class="fa-solid fa-pen-nib ml-2"></i> مُحلل النصوص
+            </h3>
+            
+            <!-- Content Type -->
+            <div class="mb-6">
+                <label class="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                    <i class="fa-solid fa-shapes ml-2 text-purple-400"></i> نوع المحتوى (الهدف):
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button onclick="setPostType('general', this)" class="type-btn active bg-indigo-600/20 text-indigo-300 border-indigo-500 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition">
+                        <i class="fa-regular fa-comments mb-2 text-lg"></i> عام
+                    </button>
+                    <button onclick="setPostType('marketing', this)" class="type-btn bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800">
+                        <i class="fa-solid fa-bag-shopping mb-2 text-lg"></i> تسويق وبيع
+                    </button>
+                    <button onclick="setPostType('education', this)" class="type-btn bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800">
+                        <i class="fa-solid fa-book-open mb-2 text-lg"></i> تعليمي
+                    </button>
+                    <button onclick="setPostType('entertainment', this)" class="type-btn bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800">
+                        <i class="fa-solid fa-film mb-2 text-lg"></i> ترفيهي
+                    </button>
+                </div>
+            </div>
+
+            <!-- Settings Toggles -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- Tone -->
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800">
+                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl">
+                        <button onclick="setTone('egyptian', this)" class="tone-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition">عامية مصرية</button>
+                        <button onclick="setTone('formal', this)" class="tone-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition">عربية فصحى</button>
+                    </div>
+                </div>
+                <!-- Emojis -->
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800">
+                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl">
+                        <button onclick="setEmoji(true, this)" class="emoji-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition">بإيموجي 🎉</button>
+                        <button onclick="setEmoji(false, this)" class="emoji-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition">بدون رموز</button>
+                    </div>
+                </div>
+                <!-- CTA -->
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800">
+                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl">
+                        <button onclick="setCTA(true, this)" class="cta-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition">سؤال ❓</button>
+                        <button onclick="setCTA(false, this)" class="cta-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition">بدون سؤال</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Area -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-300 mb-3 flex items-center">
+                    <i class="fa-solid fa-keyboard ml-2 text-indigo-400"></i> الفكرة المراد نشرها:
+                </label>
+                <textarea id="inputText" rows="6" class="w-full rounded-2xl border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 p-4 bg-slate-950 text-slate-100 placeholder-slate-600 resize-none transition" placeholder="اكتب كل أفكارك هنا بعشوائية... وسنقوم بترتيبها وصياغتها باحترافية."></textarea>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMsg" class="hidden mb-4 bg-rose-950/50 text-rose-400 p-4 rounded-xl border border-rose-900/50 text-sm font-bold">
+                <i class="fa-solid fa-triangle-exclamation ml-2"></i> <span id="errorText"></span>
+            </div>
+
+            <!-- Submit Button -->
+            <button id="analyzeBtn" onclick="analyzeContent()" class="w-full relative overflow-hidden flex items-center justify-center py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-l from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-600/25 transition-all disabled:opacity-50">
+                <span id="btnText"><i class="fa-solid fa-wand-magic-sparkles ml-2"></i> تحليل وصياغة المنشور</span>
+                <span id="btnLoading" class="hidden"><i class="fa-solid fa-spinner fa-spin ml-2"></i> جاري الاتصال بالذكاء الاصطناعي...</span>
+            </button>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="resultsSection" class="hidden space-y-5">
+            
+            <!-- Top Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Status -->
+                <div id="statusBox" class="rounded-3xl p-5 border flex items-center shadow-lg h-full">
+                    <div class="ml-4 bg-slate-950/50 p-3 rounded-full" id="statusIconBox">
+                        <i id="statusIcon" class="fa-solid fa-check text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 id="statusText" class="text-lg font-bold">الحالة</h3>
+                    </div>
+                </div>
+
+                <!-- Virality -->
+                <div id="viralityBox" class="rounded-3xl p-5 border flex items-center justify-between shadow-lg h-full">
+                    <div>
+                        <h3 class="text-sm font-bold opacity-80 mb-1">مؤشر الانتشار (Virality)</h3>
+                        <p id="viralityReason" class="text-xs opacity-90 leading-relaxed max-w-[200px]"></p>
+                    </div>
+                    <div class="flex-shrink-0 relative w-16 h-16 flex items-center justify-center rounded-full border-4 border-current bg-slate-950/20">
+                        <span id="viralityScore" class="text-xl font-black">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issues List -->
+            <div id="issuesContainer" class="hidden bg-slate-900 rounded-3xl p-6 shadow-lg border border-slate-800">
+                <h4 class="text-base font-bold text-slate-200 mb-4 flex items-center">
+                    <i class="fa-solid fa-shield-halved ml-2 text-rose-400"></i> مخالفات تم تجنبها:
+                </h4>
+                <ul id="issuesList" class="space-y-3"></ul>
+            </div>
+
+            <!-- Hooks Generator -->
+            <div id="hooksContainer" class="hidden bg-gradient-to-l from-indigo-950/40 to-slate-900 rounded-3xl p-6 shadow-lg border border-indigo-900/50 relative">
+                <h4 class="text-lg font-bold text-indigo-400 mb-4 flex items-center">
+                    <i class="fa-solid fa-bullseye ml-2"></i> الجمل الافتتاحية (اختر واحدة):
+                </h4>
+                <div id="hooksList" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+            <!-- Final Safe Version -->
+            <div class="bg-slate-900 rounded-3xl p-1 shadow-lg border border-slate-800 relative group">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-20 transition duration-1000"></div>
+                <div class="relative bg-slate-900 rounded-[22px] p-5 md:p-6">
+                    <div class="flex justify-between items-center mb-5">
+                        <h4 class="text-base font-bold text-indigo-400 flex items-center">
+                            <i class="fa-regular fa-copy ml-2"></i> المحتوى النهائي:
+                        </h4>
+                        <button onclick="copyResult()" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white shadow-md text-sm font-bold rounded-xl transition">
+                            <i class="fa-solid fa-copy ml-2"></i> نسخ المحتوى
+                        </button>
+                    </div>
+                    <div id="finalText" class="bg-slate-950 rounded-2xl p-5 border border-slate-800 text-slate-200 whitespace-pre-wrap text-lg leading-loose font-medium"></div>
+                </div>
+            </div>
+
+            <!-- Action Plan -->
+            <div id="actionPlanContainer" class="hidden bg-gradient-to-br from-emerald-950/40 to-slate-900 rounded-3xl p-6 shadow-lg border border-emerald-900/30">
+                <h4 class="text-lg font-bold text-emerald-400 mb-5 flex items-center">
+                    <i class="fa-solid fa-list-check ml-2"></i> خطة النشر الفورية ⚡
+                </h4>
+                <div id="actionPlanList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Timing & Tips -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="bg-slate-900 rounded-3xl p-6 shadow-lg border border-slate-800">
+                    <h4 class="text-base font-bold text-cyan-400 mb-4 flex items-center">
+                        <i class="fa-regular fa-clock ml-2"></i> التوقيت الأفضل
+                    </h4>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 h-full">
+                        <p id="bestTime" class="text-slate-300 leading-relaxed text-sm font-medium"></p>
+                    </div>
+                </div>
+                <div class="bg-slate-900 rounded-3xl p-6 shadow-lg border border-slate-800">
+                    <h4 class="text-base font-bold text-purple-400 mb-4 flex items-center">
+                        <i class="fa-solid fa-arrow-trend-up ml-2"></i> أسرار الوصول
+                    </h4>
+                    <ul id="reachTips" class="space-y-3"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- 1. State Variables & Key Management ---
+        // استدعاء المفتاح من ذاكرة المتصفح إذا كان المستخدم قد حفظه سابقاً
+        let apiKey = localStorage.getItem('facebook_analyzer_api_key') || ""; 
+        let aiModel = localStorage.getItem('facebook_analyzer_ai_model') || "gemini-2.5-flash"; 
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // تعبئة الحقول تلقائياً إذا كانت البيانات محفوظة
+            if (apiKey) {
+                document.getElementById('apiKeyValue').value = apiKey;
+            }
+            if (aiModel) {
+                document.getElementById('aiModelValue').value = aiModel;
+            }
+        });
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const inputKey = document.getElementById('apiKeyValue').value.trim();
+            const inputModel = document.getElementById('aiModelValue').value;
+            
+            if (!inputKey) {
+                alert("يرجى إدخال مفتاح API أولاً!");
+                return;
+            }
+
+            // تحديث المتغيرات
+            apiKey = inputKey;
+            aiModel = inputModel;
+
+            // حفظ في المتصفح لكي لا يضيع عند عمل ريفريش
+            localStorage.setItem('facebook_analyzer_api_key', apiKey);
+            localStorage.setItem('facebook_analyzer_ai_model', aiModel);
+
+            closeSettingsModal();
+            
+            // إخفاء رسالة الخطأ إن وجدت
+            document.getElementById('errorMsg').classList.add('hidden');
+        }
+        
+        let currentState = {
+            postType: 'general',
+            tone: 'egyptian',
+            useEmojis: true,
+            addQuestion: true
+        };
+
+        const CONTENT_TYPES = {
+            general: "محتوى عام يعتمد على مشاركة الأفكار اليومية والنقاشات.",
+            marketing: "محتوى تسويقي/بيعي يهدف إلى إقناع العميل بمنتج أو خدمة.",
+            education: "محتوى تعليمي يهدف إلى تبسيط معلومة أو مشاركة خبرة بشكل منظم.",
+            entertainment: "محتوى ترفيهي/فكاهي يهدف إلى رسم الابتسامة وزيادة التفاعل."
+        };
+
+        // --- 2. Image Watermark Logic (With FB Logo) ---
+        const fbLogoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`;
+        const fbLogoDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fbLogoSvg);
+
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    applyWatermark(img);
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        function applyWatermark(img) {
+            const canvas = document.getElementById('watermarkCanvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            const footerHeight = Math.max(img.height * 0.08, 50);
+            const fontSize = footerHeight * 0.45;
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.7)'; 
+            ctx.fillRect(0, img.height - footerHeight, img.width, footerHeight);
+
+            const watermarkText = "facebook.com/khaledmohyalden";
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${fontSize}px 'Cairo', sans-serif`;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+
+            const textWidth = ctx.measureText(watermarkText).width;
+            const logoSize = fontSize * 1.2;
+            const spacing = fontSize * 0.4;
+            const totalWidth = logoSize + spacing + textWidth;
+
+            const startX = (img.width - totalWidth) / 2;
+            const textY = img.height - (footerHeight / 2);
+
+            const fbLogo = new Image();
+            fbLogo.onload = function() {
+                ctx.drawImage(fbLogo, startX, textY - (logoSize / 2), logoSize, logoSize);
+                ctx.fillText(watermarkText, startX + logoSize + spacing, textY);
+                document.getElementById('imagePreviewContainer').classList.remove('hidden');
+            };
+            fbLogo.src = fbLogoDataUrl;
+        }
+
+        function downloadImage() {
+            const canvas = document.getElementById('watermarkCanvas');
+            const link = document.createElement('a');
+            link.download = 'khaledmohyalden-watermark.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+
+        // --- 3. UI Update Functions ---
+        function updateButtons(className, activeElement, activeClass, inactiveClasses) {
+            document.querySelectorAll('.' + className).forEach(btn => {
+                btn.className = `${className} ${inactiveClasses}`;
+            });
+            activeElement.className = `${className} ${activeClass}`;
+        }
+
+        function setPostType(type, element) {
+            currentState.postType = type;
+            const activeClass = "active bg-indigo-600/20 text-indigo-300 border-indigo-500 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition";
+            const inactiveClass = "bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800";
+            updateButtons('type-btn', element, activeClass, inactiveClass);
+        }
+
+        function setTone(tone, element) {
+            currentState.tone = tone;
+            updateButtons('tone-btn', element, "tone-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "tone-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
+        }
+
+        function setEmoji(use, element) {
+            currentState.useEmojis = use;
+            updateButtons('emoji-btn', element, "emoji-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "emoji-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
+        }
+
+        function setCTA(use, element) {
+            currentState.addQuestion = use;
+            updateButtons('cta-btn', element, "cta-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "cta-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
+        }
+
+        function showError(msg) {
+            const errDiv = document.getElementById('errorMsg');
+            document.getElementById('errorText').innerText = msg;
+            errDiv.classList.remove('hidden');
+            setTimeout(() => errDiv.classList.add('hidden'), 6000);
+        }
+
+        // --- 4. Copy Function ---
+        function copyText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try { document.execCommand('copy'); alert('تم النسخ بنجاح!'); } 
+            catch (err) { alert('فشل النسخ'); }
+            document.body.removeChild(textArea);
+        }
+
+        function copyResult() {
+            const text = document.getElementById('finalText').innerText;
+            copyText(text);
+        }
+
+        // --- 5. Main AI Logic ---
+        async function fetchWithRetry(url, options, retries = 3) {
+            const delays = [1000, 2000, 4000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => null);
+                        const errMsg = errData && errData.error ? errData.error.message : `HTTP error! status: ${res.status}`;
+                        throw new Error(errMsg);
+                    }
+                    return await res.json();
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        }
+
+        async function analyzeContent() {
+            // التحقق من وجود المفتاح أولاً
+            if (!apiKey) {
+                showError("يرجى إدخال مفتاح الذكاء الاصطناعي API Key من أيقونة الإعدادات ⚙️ أعلى الشاشة أولاً.");
+                openSettingsModal();
+                return;
+            }
+
+            const inputText = document.getElementById('inputText').value.trim();
+            if (!inputText) return showError("الرجاء إدخال النص أولاً.");
+
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('btnText').classList.add('hidden');
+            document.getElementById('btnLoading').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+
+            const systemPrompt = `أنت خبير في معايير مجتمع فيسبوك وخبير تسويق.حافظ على فكرة المستخدم حرفياً.جميع إجاباتك يجب أن تكون باللغة العربية.نوع المحتوى: ${CONTENT_TYPES[currentState.postType]}الشروط:- اللهجة: ${currentState.tone === 'egyptian' ? 'العامية المصرية العصرية' : 'العربية الفصحى السليمة'}- الإيموجي: ${currentState.useEmojis ? 'استخدمها بشكل طبيعي' : 'بدون إيموجي تماماً'}- سؤال النهاية: ${currentState.addQuestion ? 'نعم، أضف سؤال تفاعلي' : 'لا تضف'}استخدم 3 لـ 5 هاشتاجات فقط.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: `قم بتحليل وإعادة صياغة: "${inputText}"` }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            status: { type: "STRING", description: "safe, warning, or danger" },
+                            issues: { type: "ARRAY", items: { type: "STRING" } },
+                            hooks: { type: "ARRAY", items: { type: "STRING" } },
+                            safe_version: { type: "STRING" },
+                            virality_score: { type: "INTEGER" },
+                            virality_reason: { type: "STRING" },
+                            best_time: { type: "STRING" },
+                            reach_tips: { type: "ARRAY", items: { type: "STRING" } },
+                            action_plan: { type: "ARRAY", items: { type: "STRING" } }
+                        },
+                        required: ["status", "issues", "hooks", "safe_version", "virality_score", "virality_reason", "best_time", "reach_tips", "action_plan"]
+                    }
+                }
+            };
+
+            try {
+                // استخدام الموديل الديناميكي والمفتاح
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${apiKey}`;
+                const response = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const rawText = response.candidates[0].content.parts[0].text;
+                const data = JSON.parse(rawText);
+                
+                renderResults(data);
+
+            } catch (err) {
+                console.error("تفاصيل الخطأ:", err);
+                // رسالة خطأ ذكية توضح المشكلة
+                if (err.message.includes("API key not valid")) {
+                    showError("مفتاح API غير صحيح أو به خطأ، يرجى التحقق منه من الإعدادات.");
+                    openSettingsModal();
+                } else if (err.message.includes("is not found") || err.message.includes("not supported")) {
+                    showError("النموذج المختار غير مدعوم أو قديم، يرجى اختيار إصدار أحدث (مثل Gemini 2.5 Flash) من الإعدادات.");
+                    openSettingsModal();
+                } else {
+                    showError(`تأكد أنك تقوم بتشغيل الملف على سيرفر محلي (Localhost) وليس مباشرة من سطح المكتب (file:///).`);
+                }
+            } finally {
+                document.getElementById('analyzeBtn').disabled = false;
+                document.getElementById('btnText').classList.remove('hidden');
+                document.getElementById('btnLoading').classList.add('hidden');
+            }
+        }
+
+        // --- 6. Render Results ---
+        function renderResults(data) {
+            // Status UI
+            const statusBox = document.getElementById('statusBox');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            
+            statusBox.className = "rounded-3xl p-5 border flex items-center shadow-lg h-full";
+            if(data.status === 'safe') {
+                statusBox.classList.add('border-emerald-800/50', 'bg-emerald-950/40');
+                statusText.className = "text-lg font-bold text-emerald-400";
+                statusText.innerText = "آمن ومطابق للمعايير";
+                statusIcon.className = "fa-solid fa-check text-2xl text-emerald-400";
+            } else if (data.status === 'warning') {
+                statusBox.classList.add('border-amber-800/50', 'bg-amber-950/40');
+                statusText.className = "text-lg font-bold text-amber-400";
+                statusText.innerText = "تحذير: كلمات تقلل الوصول";
+                statusIcon.className = "fa-solid fa-triangle-exclamation text-2xl text-amber-400";
+            } else {
+                statusBox.classList.add('border-rose-800/50', 'bg-rose-950/40');
+                statusText.className = "text-lg font-bold text-rose-400";
+                statusText.innerText = "مخالف بشدة!";
+                statusIcon.className = "fa-solid fa-xmark text-2xl text-rose-400";
+            }
+
+            // Virality Score
+            const score = Number(data.virality_score) || 0;
+            const virBox = document.getElementById('viralityBox');
+            virBox.className = "rounded-3xl p-5 border flex items-center justify-between shadow-lg h-full";
+            if (score >= 85) virBox.classList.add('text-emerald-400', 'bg-emerald-400/10', 'border-emerald-400/30');
+            else if (score >= 60) virBox.classList.add('text-amber-400', 'bg-amber-400/10', 'border-amber-400/30');
+            else virBox.classList.add('text-rose-400', 'bg-rose-400/10', 'border-rose-400/30');
+            
+            document.getElementById('viralityScore').innerText = score;
+            document.getElementById('viralityReason').innerText = data.virality_reason;
+
+            // Issues
+            const issuesContainer = document.getElementById('issuesContainer');
+            if (data.issues && data.issues.length > 0) {
+                issuesContainer.classList.remove('hidden');
+                document.getElementById('issuesList').innerHTML = data.issues.map(i => `
+                    <li class="flex items-start bg-slate-950 p-3 rounded-xl border border-slate-800/50">
+                        <span class="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full bg-rose-500 ml-3 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>
+                        <span class="text-slate-300 text-sm leading-relaxed">${i}</span>
+                    </li>`).join('');
+            } else {
+                issuesContainer.classList.add('hidden');
+            }
+
+            // Hooks
+            const hooksContainer = document.getElementById('hooksContainer');
+            if (data.hooks && data.hooks.length > 0) {
+                hooksContainer.classList.remove('hidden');
+                document.getElementById('hooksList').innerHTML = data.hooks.map(h => `
+                    <div class="flex items-center justify-between bg-slate-950 p-4 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition">
+                        <p class="text-sm text-slate-200 font-medium leading-relaxed flex-1 ml-4">${h}</p>
+                        <button onclick="copyText('${h.replace(/'/g, "\\'")}')" class="p-2 bg-slate-900 rounded-xl hover:bg-indigo-600 text-slate-400 hover:text-white transition">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>`).join('');
+            } else {
+                hooksContainer.classList.add('hidden');
+            }
+
+            // Final Text
+            document.getElementById('finalText').innerText = data.safe_version;
+
+            // Action Plan
+            const actionContainer = document.getElementById('actionPlanContainer');
+            if (data.action_plan && data.action_plan.length > 0) {
+                actionContainer.classList.remove('hidden');
+                document.getElementById('actionPlanList').innerHTML = data.action_plan.map((step, idx) => `
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-emerald-900/30 flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-10 h-10 bg-emerald-500/10 rounded-bl-full flex justify-end pt-1 pr-2">
+                            <span class="text-emerald-500/50 font-black text-sm">${idx + 1}</span>
+                        </div>
+                        <p class="text-sm text-slate-300 leading-relaxed font-medium z-10">${step}</p>
+                    </div>`).join('');
+            } else {
+                actionContainer.classList.add('hidden');
+            }
+
+            // Time & Tips
+            document.getElementById('bestTime').innerText = data.best_time;
+            document.getElementById('reachTips').innerHTML = (data.reach_tips || []).map(tip => `
+                <li class="flex items-start bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span class="flex-shrink-0 w-1.5 h-1.5 mt-2 rounded-full bg-purple-500 ml-3"></span>
+                    <span class="text-slate-300 text-sm">${tip}</span>
+                </li>`).join('');
+
+            // Show results
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>
