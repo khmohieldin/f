@@ -22,6 +22,14 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); }
+        
+        /* أنيميشن الدخول */
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            50% { transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop-in { animation: popIn 0.4s ease-out forwards; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 min-h-screen p-4 md:p-8 selection:bg-indigo-500/30">
@@ -84,6 +92,61 @@
             <p class="text-slate-400 text-sm md:text-base max-w-lg mx-auto leading-relaxed">
                 اكتب أفكارك وسنحولها لمحتوى تسويقي جذاب ومطابق لخوارزميات فيسبوك بضغطة زر.
             </p>
+        </div>
+
+        <!-- قسم دليل معايير فيسبوك المضاف حديثاً -->
+        <div class="bg-slate-900 rounded-3xl p-5 md:p-8 shadow-xl border border-slate-800">
+            <div class="flex justify-between items-center cursor-pointer group" onclick="document.getElementById('fbGuideContent').classList.toggle('hidden'); document.getElementById('fbGuideArrow').classList.toggle('rotate-180');">
+                <div>
+                    <h3 class="text-xl font-bold text-blue-400 flex items-center">
+                        <i class="fa-solid fa-book-open-reader ml-2"></i> دليل معايير فيسبوك للنجاح
+                    </h3>
+                    <p class="text-sm text-slate-400 mt-1 hidden md:block">أفضل الممارسات لزيادة التفاعل والمشاهدات على منشوراتك</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center transition">
+                    <i id="fbGuideArrow" class="fa-solid fa-chevron-down text-slate-300 transition-transform duration-300"></i>
+                </div>
+            </div>
+            
+            <div id="fbGuideContent" class="hidden mt-6 border-t border-slate-800 pt-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 hover:border-blue-500/30 transition">
+                        <div class="w-8 h-8 rounded-full bg-blue-900/30 flex items-center justify-center text-blue-400 mb-3"><i class="fa-regular fa-clock"></i></div>
+                        <h4 class="text-slate-200 font-bold text-sm mb-1">أوقات النشاط</h4>
+                        <p class="text-slate-400 text-xs leading-relaxed">تحقق من إحصاءات صفحتك لمعرفة الأوقات التي يكون فيها جمهورك نشطاً لجدولة النشر.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 hover:border-purple-500/30 transition">
+                        <div class="w-8 h-8 rounded-full bg-purple-900/30 flex items-center justify-center text-purple-400 mb-3"><i class="fa-solid fa-chart-line"></i></div>
+                        <h4 class="text-slate-200 font-bold text-sm mb-1">تكرار النشر</h4>
+                        <p class="text-slate-400 text-xs leading-relaxed">انشر باعتدال وتجنب الإفراط في اليوم الواحد، لتبقى مرئياً دون تقليل التفاعل.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 hover:border-emerald-500/30 transition">
+                        <div class="w-8 h-8 rounded-full bg-emerald-900/30 flex items-center justify-center text-emerald-400 mb-3"><i class="fa-regular fa-comments"></i></div>
+                        <h4 class="text-slate-200 font-bold text-sm mb-1">الرد على الجميع</h4>
+                        <p class="text-slate-400 text-xs leading-relaxed">تفاعل مع جمهورك بالرد على كافة التعليقات والرسائل لأن هذا يشجع على المزيد من التفاعل.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 hover:border-rose-500/30 transition">
+                        <div class="w-8 h-8 rounded-full bg-rose-900/30 flex items-center justify-center text-rose-400 mb-3"><i class="fa-regular fa-image"></i></div>
+                        <h4 class="text-slate-200 font-bold text-sm mb-1">المرئيات والقصص</h4>
+                        <p class="text-slate-400 text-xs leading-relaxed">استخدم الصور الأصلية والفيديو، وشارك المحتوى بعفوية وتكرار عبر قصص الصفحات (Stories).</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 hover:border-amber-500/30 transition">
+                        <div class="w-8 h-8 rounded-full bg-amber-900/30 flex items-center justify-center text-amber-400 mb-3"><i class="fa-solid fa-hand-pointer"></i></div>
+                        <h4 class="text-slate-200 font-bold text-sm mb-1">زر الإجراء (CTA)</h4>
+                        <p class="text-slate-400 text-xs leading-relaxed">أضف أزرار الحث مثل "معرفة المزيد" أو "اتصل بنا" لدفع الإجراءات المهمة لعملك.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 hover:border-cyan-500/30 transition">
+                        <div class="w-8 h-8 rounded-full bg-cyan-900/30 flex items-center justify-center text-cyan-400 mb-3"><i class="fa-solid fa-retweet"></i></div>
+                        <h4 class="text-slate-200 font-bold text-sm mb-1">النشر المتبادل</h4>
+                        <p class="text-slate-400 text-xs leading-relaxed">انشر المحتوى عبر منصات أخرى مثل إنستغرام لزيادة الوصول وتوفير وقتك.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 hover:border-indigo-500/30 transition md:col-span-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-900/30 flex items-center justify-center text-indigo-400 mb-3"><i class="fa-solid fa-bullhorn"></i></div>
+                        <h4 class="text-slate-200 font-bold text-sm mb-1">إعلانات ميتا (Meta Ads)</h4>
+                        <p class="text-slate-400 text-xs leading-relaxed">استخدم مدير إعلانات ميتا لزيادة التفاعل عن طريق إنشاء إعلانات جديدة أو ترويج منشوراتك.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Image Watermark Section -->
@@ -271,6 +334,60 @@
                 </div>
             </div>
         </div>
+
+        <!-- قسم الرد السريع على التعليقات الجديد -->
+        <div class="bg-slate-900 rounded-3xl p-5 md:p-8 shadow-xl border border-slate-800 mt-6">
+            <h3 class="text-xl font-bold text-emerald-400 mb-6 flex items-center">
+                <i class="fa-regular fa-comments ml-2"></i> 💬 الرد السريع الآلي
+            </h3>
+            
+            <p class="text-sm text-slate-400 mb-6">انسخ تعليق العميل هنا، وسنقوم بتوليد رد بالعامية المصرية مختصر جداً ومناسب للموقف.</p>
+
+            <!-- Reply Settings Toggles -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Tone -->
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800">
+                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl">
+                        <button onclick="setReplyTone('funny', this)" class="reply-tone-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition">فكاهي 😂</button>
+                        <button onclick="setReplyTone('serious', this)" class="reply-tone-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition">جدي 👔</button>
+                    </div>
+                </div>
+                <!-- Animations / Emojis -->
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800">
+                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl">
+                        <button onclick="setReplyAnimation(true, this)" class="reply-anim-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition">بأنيميشن وإيموجي ✨</button>
+                        <button onclick="setReplyAnimation(false, this)" class="reply-anim-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition">بدون إضافات 📝</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reply Text Area -->
+            <div class="mb-6">
+                <textarea id="replyInputText" rows="3" class="w-full rounded-2xl border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 p-4 bg-slate-950 text-slate-100 placeholder-slate-600 resize-none transition" placeholder="الصق تعليق العميل أو البوست هنا..."></textarea>
+            </div>
+
+            <!-- Error Message for Replies -->
+            <div id="replyErrorMsg" class="hidden mb-4 bg-rose-950/50 text-rose-400 p-4 rounded-xl border border-rose-900/50 text-sm font-bold">
+                <i class="fa-solid fa-triangle-exclamation ml-2"></i> <span id="replyErrorText"></span>
+            </div>
+
+            <!-- Generate Reply Button -->
+            <button id="generateReplyBtn" onclick="generateReply()" class="w-full relative overflow-hidden flex items-center justify-center py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-l from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/25 transition-all disabled:opacity-50">
+                <span id="replyBtnText"><i class="fa-solid fa-bolt ml-2"></i> توليد الرد الآن</span>
+                <span id="replyBtnLoading" class="hidden"><i class="fa-solid fa-spinner fa-spin ml-2"></i> جاري كتابة الرد...</span>
+            </button>
+
+            <!-- Reply Result Area -->
+            <div id="replyResultSection" class="hidden mt-6 bg-slate-950 rounded-2xl p-5 border border-emerald-900/50 text-slate-200 relative group transition-all">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm text-emerald-400 font-bold"><i class="fa-solid fa-robot ml-1"></i> الرد المقترح:</span>
+                    <button onclick="copyReply()" class="inline-flex items-center px-3 py-1.5 bg-slate-800 hover:bg-emerald-600 text-white shadow-md text-xs font-bold rounded-lg transition">
+                        <i class="fa-solid fa-copy ml-1"></i> نسخ
+                    </button>
+                </div>
+                <p id="replyResultText" class="text-xl leading-relaxed font-bold text-emerald-100 whitespace-pre-wrap"></p>
+            </div>
+        </div>
     </div>
 
     <!-- Application Logic -->
@@ -319,6 +436,7 @@
             
             // إخفاء رسالة الخطأ إن وجدت
             document.getElementById('errorMsg').classList.add('hidden');
+            document.getElementById('replyErrorMsg').classList.add('hidden');
         }
         
         let currentState = {
@@ -326,6 +444,11 @@
             tone: 'egyptian',
             useEmojis: true,
             addQuestion: true
+        };
+
+        let replyState = {
+            tone: 'funny',
+            animation: true
         };
 
         const CONTENT_TYPES = {
@@ -429,9 +552,27 @@
             updateButtons('cta-btn', element, "cta-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "cta-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
         }
 
+        // Reply UI Setters
+        function setReplyTone(tone, element) {
+            replyState.tone = tone;
+            updateButtons('reply-tone-btn', element, "reply-tone-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "reply-tone-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
+        }
+
+        function setReplyAnimation(use, element) {
+            replyState.animation = use;
+            updateButtons('reply-anim-btn', element, "reply-anim-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "reply-anim-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
+        }
+
         function showError(msg) {
             const errDiv = document.getElementById('errorMsg');
             document.getElementById('errorText').innerText = msg;
+            errDiv.classList.remove('hidden');
+            setTimeout(() => errDiv.classList.add('hidden'), 6000);
+        }
+
+        function showReplyError(msg) {
+            const errDiv = document.getElementById('replyErrorMsg');
+            document.getElementById('replyErrorText').innerText = msg;
             errDiv.classList.remove('hidden');
             setTimeout(() => errDiv.classList.add('hidden'), 6000);
         }
@@ -449,6 +590,11 @@
 
         function copyResult() {
             const text = document.getElementById('finalText').innerText;
+            copyText(text);
+        }
+
+        function copyReply() {
+            const text = document.getElementById('replyResultText').innerText;
             copyText(text);
         }
 
@@ -471,6 +617,7 @@
             }
         }
 
+        // --- Post Analyzer ---
         async function analyzeContent() {
             // التحقق من وجود المفتاح أولاً
             if (!apiKey) {
@@ -487,7 +634,7 @@
             document.getElementById('btnLoading').classList.remove('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
 
-            const systemPrompt = `أنت خبير في معايير مجتمع فيسبوك وخبير تسويق.حافظ على فكرة المستخدم حرفياً.جميع إجاباتك يجب أن تكون باللغة العربية.نوع المحتوى: ${CONTENT_TYPES[currentState.postType]}الشروط:- اللهجة: ${currentState.tone === 'egyptian' ? 'العامية المصرية العصرية' : 'العربية الفصحى السليمة'}- الإيموجي: ${currentState.useEmojis ? 'استخدمها بشكل طبيعي' : 'بدون إيموجي تماماً'}- سؤال النهاية: ${currentState.addQuestion ? 'نعم، أضف سؤال تفاعلي' : 'لا تضف'}استخدم 3 لـ 5 هاشتاجات فقط.`;
+            const systemPrompt = `أنت خبير في معايير مجتمع فيسبوك وخبير تسويق.حافظ على فكرة المستخدم حرفياً.جميع إجاباتك يجب أن تكون باللغة العربية.نوع المحتوى: ${CONTENT_TYPES[currentState.postType]}الشروط:- اللهجة: ${currentState.tone === 'egyptian' ? 'العامية المصرية العصرية' : 'العربية الفصحى السليمة'}- الإيموجي: ${currentState.useEmojis ? 'استخدمها بشكل طبيعي' : 'بدون إيموجي تماماً'}- سؤال النهاية: ${currentState.addQuestion ? 'نعم، أضف سؤال تفاعلي' : 'لا تضف'}استخدم 3 لـ 5 هاشتاجات فقط. بالإضافة إلى ذلك، قم بتطبيق "معايير فيسبوك للنجاح" بدقة: (أضف Call-to-Action واضح مثل زر أو رابط، شجع التفاعل في الصياغة ليتسنى لصاحب الصفحة الرد على التعليقات، واقترح ضمن 'خطة النشر' استخدام المرئيات المناسبة أو مشاركته كقصة Story لزيادة المشاهدات).`;
 
             const payload = {
                 contents: [{ parts: [{ text: `قم بتحليل وإعادة صياغة: "${inputText}"` }] }],
@@ -542,6 +689,85 @@
                 document.getElementById('analyzeBtn').disabled = false;
                 document.getElementById('btnText').classList.remove('hidden');
                 document.getElementById('btnLoading').classList.add('hidden');
+            }
+        }
+
+        // --- Reply Generator ---
+        async function generateReply() {
+            if (!apiKey) {
+                showReplyError("يرجى إدخال مفتاح الذكاء الاصطناعي API Key من أيقونة الإعدادات ⚙️ أعلى الشاشة أولاً.");
+                openSettingsModal();
+                return;
+            }
+
+            const inputText = document.getElementById('replyInputText').value.trim();
+            if (!inputText) return showReplyError("الرجاء إدخال التعليق أو المنشور المطلوب الرد عليه أولاً.");
+
+            document.getElementById('generateReplyBtn').disabled = true;
+            document.getElementById('replyBtnText').classList.add('hidden');
+            document.getElementById('replyBtnLoading').classList.remove('hidden');
+            document.getElementById('replyResultSection').classList.add('hidden');
+            document.getElementById('replyResultSection').classList.remove('animate-pop-in'); // Reset animation
+
+            const tonePrompt = replyState.tone === 'funny' ? 'فكاهي، مضحك، لطيف، وبيهزر (بشكل محترم)' : 'جدي، احترافي، مباشر، ومحترم جداً';
+            const emojiPrompt = replyState.animation ? 'استخدم إيموجي معبرة جداً وكثيرة تناسب الرد' : 'بدون استخدام أي إيموجي أو رموز نهائياً';
+
+            const systemPrompt = `أنت تدير صفحة فيسبوك في مصر وترد على تعليقات أو منشورات المتابعين.
+شروط الرد:
+1- اللهجة: عامية مصرية فقط (طبيعية جداً زي ما المصريين بيكلموا بعض على السوشيال ميديا).
+2- الطول: مختصر جداً جداً جداً (جملة واحدة أو اثنتين بحد أقصى، لا تطل في الكلام أبداً).
+3- الأسلوب: ${tonePrompt}.
+4- الإيموجي/الأنيميشن: ${emojiPrompt}.
+اكتب الرد مباشرة وبدون أي مقدمات أو شرح.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: `التعليق أو المنشور: "${inputText}"` }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            reply: { type: "STRING" }
+                        },
+                        required: ["reply"]
+                    }
+                }
+            };
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${apiKey}`;
+                const response = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const rawText = response.candidates[0].content.parts[0].text;
+                const data = JSON.parse(rawText);
+                
+                document.getElementById('replyResultText').innerText = data.reply;
+                
+                const resultBox = document.getElementById('replyResultSection');
+                resultBox.classList.remove('hidden');
+
+                // إضافة أنيميشن في حال اختيار تفعيله
+                if (replyState.animation) {
+                    resultBox.classList.add('animate-pop-in');
+                }
+
+            } catch (err) {
+                console.error("تفاصيل الخطأ:", err);
+                if (err.message.includes("API key not valid")) {
+                    showReplyError("مفتاح API غير صحيح أو به خطأ، يرجى التحقق منه من الإعدادات.");
+                    openSettingsModal();
+                } else {
+                    showReplyError(`تأكد أنك تقوم بتشغيل الملف على سيرفر محلي (Localhost).`);
+                }
+            } finally {
+                document.getElementById('generateReplyBtn').disabled = false;
+                document.getElementById('replyBtnText').classList.remove('hidden');
+                document.getElementById('replyBtnLoading').classList.add('hidden');
             }
         }
 
