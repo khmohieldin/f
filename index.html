@@ -188,7 +188,7 @@
                 <label class="text-sm font-bold text-slate-300 mb-3 flex items-center">
                     <i class="fa-solid fa-bullseye ml-2 text-purple-400"></i> وصف الهدف من البوست (أمر للذكاء الاصطناعي):
                 </label>
-                <input type="text" id="customPrompt" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none focus:border-indigo-500 transition" placeholder="مثال: عايز بوست ساخر، أو بوست جد جداً بيناقش مشكلة، أو تسويق لمنتج...">
+                <input type="text" id="customPrompt" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none focus:border-indigo-500 transition" placeholder="مثال: عدل الكلمات المخالفة بس وماتغيرش البوست، أو عايز بوست ساخر...">
             </div>
 
             <!-- Settings Toggles -->
@@ -602,27 +602,27 @@
             if (!inputText) return showError("الرجاء إدخال النص أولاً.");
 
             // جلب وصف أو هدف البوست المدخل من قبل المستخدم
-            const customGoal = document.getElementById('customPrompt').value.trim() || 'صياغة بوست طبيعي وجذاب';
+            const customGoal = document.getElementById('customPrompt').value.trim();
 
             document.getElementById('analyzeBtn').disabled = true;
             document.getElementById('btnText').classList.add('hidden');
             document.getElementById('btnLoading').classList.remove('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
 
-            const systemPrompt = `أنت خبير في معايير مجتمع فيسبوك. مهمتك إعادة صياغة النص مع الحفاظ الصارم على فكرة المستخدم ومقصده (إذا كان ينتقد أو يسخر من شيء، حافظ على النقد والسخرية ولا تحولها لقصة أخرى أبداً).
-الهدف والوصف المطلوب للبوست: ${customGoal}
-الشروط القاطعة:
-1- الفكرة: لا تؤلف قصة جديدة! حافظ على سياق النص الأصلي 100%.
-2- الضمير: استخدم صيغة المتكلم المفرد ("أنا") ولا تستخدم صيغة الجمع ("نحن" أو "إحنا") إطلاقاً إلا إذا كان النص الأصلي بصيغة الجمع.
-3- الطول: البوست يجب أن يكون مختصراً، مباشراً، وغير ممل. لا تضف ديباجات تسويقية مبالغ فيها.
-4- الأسلوب: اجعل الكلام طبيعياً كأنه شخص يكتب على حسابه الشخصي، بدون عبارات مصطنعة مثل (يسعدنا الرد عليكم، شاركونا في التعليقات).
-5- اللهجة: ${currentState.tone === 'egyptian' ? 'العامية المصرية العصرية الطبيعية' : 'العربية الفصحى السليمة'}
-6- الإيموجي: ${currentState.useEmojis ? 'استخدمها بشكل طبيعي' : 'بدون إيموجي تماماً'}
-7- سؤال النهاية: ${currentState.addQuestion ? 'نعم، أضف سؤال تفاعلي قصير جداً من صميم الموضوع' : 'لا تضف'}
-استخدم 3 لـ 5 هاشتاجات فقط. واقترح ضمن 'خطة النشر' استخدام المرئيات المناسبة أو مشاركته كقصة Story لزيادة المشاهدات.`;
+            const systemPrompt = `أنت خبير في معايير مجتمع فيسبوك.
+الأولوية المطلقة: تنفيذ الأمر أو الهدف التالي من المستخدم حرفياً وبدقة متناهية على النص المدخل:
+(( ${customGoal ? customGoal : 'حلل النص وأعد صياغته ليكون جذاباً ومناسباً لفيسبوك'} ))
+
+تنبيه هام جداً: إذا كان الأمر بالأعلى يطلب منك (عدم تغيير النص) أو (تعديل الكلمات المخالفة فقط)، فيجب عليك الالتزام بذلك تماماً ووضع النص الأصلي للمستخدم كما هو في حقل safe_version مع تبديل الكلمات المخالفة فقط، وتجاهل أي شروط أو إضافات أسلوبية أخرى بالأسفل.
+
+الشروط الإرشادية (تُطبق فقط إذا كانت لا تتعارض مع الهدف والأمر الأساسي بالأعلى):
+- الفكرة والضمير: حافظ على المعنى الأصلي تماماً ولا تغير الضمائر (إذا كان يتحدث بصيغة المفرد "أنا" اتركه مفرد ولا تحوله لجمع).
+- اللهجة المفضلة: ${currentState.tone === 'egyptian' ? 'العامية المصرية الطبيعية' : 'العربية الفصحى'}
+- الإيموجي: ${currentState.useEmojis ? 'مسموح' : 'بدون إيموجي تماماً'}
+- سؤال تفاعلي: ${currentState.addQuestion ? 'إذا كان مناسباً للسياق، أضف سؤالاً في النهاية' : 'لا تضف'}`;
 
             const payload = {
-                contents: [{ parts: [{ text: `قم بتحليل وإعادة صياغة: "${inputText}"` }] }],
+                contents: [{ parts: [{ text: `قم بتنفيذ الأمر المطلوب على هذا النص:\n"${inputText}"` }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
