@@ -626,7 +626,7 @@
             if (!inputText) return showError("الرجاء إدخال النص أولاً.");
 
             // جلب وصف أو هدف البوست المدخل من قبل المستخدم
-            const customGoal = document.getElementById('customPrompt').value.trim();
+            const userPromptGoal = document.getElementById('customPrompt').value.trim();
 
             document.getElementById('analyzeBtn').disabled = true;
             document.getElementById('btnText').classList.add('hidden');
@@ -635,7 +635,7 @@
 
             const systemPrompt = `أنت خبير في معايير مجتمع فيسبوك.
 الأولوية المطلقة: تنفيذ الأمر أو الهدف التالي من المستخدم حرفياً وبدقة متناهية على النص المدخل:
-(( ${customGoal ? customGoal : 'حلل النص وأعد صياغته ليكون جذاباً ومناسباً لفيسبوك'} ))
+(( ${userPromptGoal ? userPromptGoal : 'حلل النص وأعد صياغته ليكون جذاباً ومناسباً لفيسبوك'} ))
 
 تنبيه هام جداً: 
 1. إذا كان الأمر يطلب منك (عدم تغيير النص) أو (تعديل الكلمات المخالفة فقط)، فيجب عليك الالتزام بذلك تماماً ووضع النص الأصلي للمستخدم كما هو في حقل safe_version مع تبديل الكلمات المخالفة لمعايير فيسبوك فقط.
@@ -845,14 +845,26 @@
                 document.getElementById('modificationAdvice').innerText = data.modified_words_report.advice || 'حاول تجنب هذه الكلمات مستقبلاً.';
                 
                 const modsHtml = (data.modified_words_report.modifications || []).map(mod => `
-                    <div class="flex flex-col md:flex-row md:items-center justify-between bg-slate-950 p-3.5 rounded-xl border border-slate-800/60 gap-3 hover:border-amber-500/30 transition">
-                        <div class="flex items-center gap-3 flex-shrink-0">
-                            <span class="line-through decoration-rose-500 text-rose-300 text-sm bg-rose-500/10 px-3 py-1.5 rounded-lg font-medium">${mod.original}</span>
-                            <i class="fa-solid fa-arrow-left-long text-slate-500"></i>
-                            <span class="text-emerald-400 text-sm bg-emerald-500/10 px-3 py-1.5 rounded-lg font-bold shadow-inner">${mod.changed_to}</span>
+                    <div class="flex flex-col bg-slate-950 p-4 rounded-xl border border-slate-800/60 gap-3 hover:border-amber-500/30 transition">
+                        <div class="flex flex-col lg:flex-row gap-3 lg:items-start">
+                            <div class="flex-1 bg-rose-500/5 p-3 rounded-lg border border-rose-500/10 min-w-0">
+                                <span class="block text-xs font-bold text-rose-500 mb-1">الكلمة/الجملة الأصلية:</span>
+                                <span class="line-through decoration-rose-500/50 text-rose-300 text-sm font-medium break-words whitespace-pre-wrap">${mod.original}</span>
+                            </div>
+                            <div class="hidden lg:flex items-center justify-center pt-5 flex-shrink-0">
+                                <i class="fa-solid fa-arrow-left-long text-slate-600"></i>
+                            </div>
+                            <div class="flex items-center justify-center lg:hidden flex-shrink-0">
+                                <i class="fa-solid fa-arrow-down-long text-slate-600"></i>
+                            </div>
+                            <div class="flex-1 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10 min-w-0">
+                                <span class="block text-xs font-bold text-emerald-500 mb-1">التعديل المقترح:</span>
+                                <span class="text-emerald-400 text-sm font-bold break-words whitespace-pre-wrap">${mod.changed_to}</span>
+                            </div>
                         </div>
-                        <div class="text-xs text-slate-400 md:text-left flex-1 bg-slate-900/50 p-2 rounded-lg border border-slate-800 border-dashed">
-                            <i class="fa-solid fa-circle-info text-slate-500 ml-1"></i> ${mod.reason}
+                        <div class="text-xs text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800 border-dashed mt-1 flex items-start gap-2">
+                            <i class="fa-solid fa-circle-info text-slate-500 mt-0.5 flex-shrink-0"></i> 
+                            <span class="font-medium leading-relaxed break-words">${mod.reason}</span>
                         </div>
                     </div>
                 `).join('');
