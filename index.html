@@ -237,7 +237,7 @@
         </div>
 
         <!-- Results Section (Hidden by default) -->
-        <div id="resultsSection" class="hidden space-y-5">
+        <div id="resultsSection" class="hidden space-y-5 mt-6">
             
             <!-- Top Stats -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -263,10 +263,34 @@
                 </div>
             </div>
 
+            <!-- Modified Words Report (NEW) -->
+            <div id="modifiedWordsContainer" class="hidden bg-gradient-to-br from-amber-950/30 to-slate-900 rounded-3xl p-6 shadow-lg border border-amber-900/40">
+                <div class="flex justify-between items-center mb-5">
+                    <h4 class="text-base font-bold text-amber-400 flex items-center">
+                        <i class="fa-solid fa-eraser ml-2"></i> الكلمات المعدلة: 
+                        <span id="modifiedCount" class="mr-3 px-3 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs"></span>
+                    </h4>
+                </div>
+                
+                <div id="modificationsList" class="space-y-3 mb-5">
+                    <!-- سيتم حقن الكلمات هنا -->
+                </div>
+
+                <div class="bg-amber-950/40 p-4 rounded-xl border border-amber-900/50 flex items-start">
+                    <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 ml-3 flex-shrink-0">
+                        <i class="fa-regular fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-amber-300 mb-1">نصيحة لتجنب الحظر:</p>
+                        <p id="modificationAdvice" class="text-sm text-amber-100/80 leading-relaxed font-medium"></p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Issues List -->
             <div id="issuesContainer" class="hidden bg-slate-900 rounded-3xl p-6 shadow-lg border border-slate-800">
                 <h4 class="text-base font-bold text-slate-200 mb-4 flex items-center">
-                    <i class="fa-solid fa-shield-halved ml-2 text-rose-400"></i> مخالفات تم تجنبها:
+                    <i class="fa-solid fa-shield-halved ml-2 text-rose-400"></i> مخالفات أخرى تم تجنبها:
                 </h4>
                 <ul id="issuesList" class="space-y-3"></ul>
             </div>
@@ -613,10 +637,12 @@
 الأولوية المطلقة: تنفيذ الأمر أو الهدف التالي من المستخدم حرفياً وبدقة متناهية على النص المدخل:
 (( ${customGoal ? customGoal : 'حلل النص وأعد صياغته ليكون جذاباً ومناسباً لفيسبوك'} ))
 
-تنبيه هام جداً: إذا كان الأمر بالأعلى يطلب منك (عدم تغيير النص) أو (تعديل الكلمات المخالفة فقط)، فيجب عليك الالتزام بذلك تماماً ووضع النص الأصلي للمستخدم كما هو في حقل safe_version مع تبديل الكلمات المخالفة فقط، وتجاهل أي شروط أو إضافات أسلوبية أخرى بالأسفل.
+تنبيه هام جداً: 
+1. إذا كان الأمر يطلب منك (عدم تغيير النص) أو (تعديل الكلمات المخالفة فقط)، فيجب عليك الالتزام بذلك تماماً ووضع النص الأصلي للمستخدم كما هو في حقل safe_version مع تبديل الكلمات المخالفة لمعايير فيسبوك فقط.
+2. تتبع بدقة كل كلمة قمت بتغييرها بسبب مخالفتها للمعايير (أو بناءً على طلب المستخدم) وسجلها في قسم "modified_words_report".
 
 الشروط الإرشادية (تُطبق فقط إذا كانت لا تتعارض مع الهدف والأمر الأساسي بالأعلى):
-- الفكرة والضمير: حافظ على المعنى الأصلي تماماً ولا تغير الضمائر (إذا كان يتحدث بصيغة المفرد "أنا" اتركه مفرد ولا تحوله لجمع).
+- الفكرة والضمير: حافظ على المعنى الأصلي تماماً ولا تغير الضمائر.
 - اللهجة المفضلة: ${currentState.tone === 'egyptian' ? 'العامية المصرية الطبيعية' : 'العربية الفصحى'}
 - الإيموجي: ${currentState.useEmojis ? 'مسموح' : 'بدون إيموجي تماماً'}
 - سؤال تفاعلي: ${currentState.addQuestion ? 'إذا كان مناسباً للسياق، أضف سؤالاً في النهاية' : 'لا تضف'}`;
@@ -637,9 +663,27 @@
                             virality_reason: { type: "STRING" },
                             best_time: { type: "STRING" },
                             reach_tips: { type: "ARRAY", items: { type: "STRING" } },
-                            action_plan: { type: "ARRAY", items: { type: "STRING" } }
+                            action_plan: { type: "ARRAY", items: { type: "STRING" } },
+                            modified_words_report: {
+                                type: "OBJECT",
+                                properties: {
+                                    count: { type: "INTEGER", description: "عدد الكلمات أو الجمل التي تم تغييرها" },
+                                    modifications: {
+                                        type: "ARRAY",
+                                        items: {
+                                            type: "OBJECT",
+                                            properties: {
+                                                original: { type: "STRING", description: "الكلمة الأصلية قبل التعديل" },
+                                                changed_to: { type: "STRING", description: "الكلمة الجديدة بعد التعديل" },
+                                                reason: { type: "STRING", description: "سبب التعديل (مثال: كلمة تسبب تقييد الوصول، كلمة عنيفة، إلخ)" }
+                                            }
+                                        }
+                                    },
+                                    advice: { type: "STRING", description: "نصيحة عامة للمستخدم بناءً على هذه الأخطاء لتجنبها مستقبلاً" }
+                                }
+                            }
                         },
-                        required: ["status", "issues", "hooks", "safe_version", "virality_score", "virality_reason", "best_time", "reach_tips", "action_plan"]
+                        required: ["status", "issues", "hooks", "safe_version", "virality_score", "virality_reason", "best_time", "reach_tips", "action_plan", "modified_words_report"]
                     }
                 }
             };
@@ -792,6 +836,30 @@
             
             document.getElementById('viralityScore').innerText = score;
             document.getElementById('viralityReason').innerText = data.virality_reason;
+
+            // Modified Words Report UI (القسم الجديد للكلمات المعدلة)
+            const modContainer = document.getElementById('modifiedWordsContainer');
+            if (data.modified_words_report && data.modified_words_report.count > 0) {
+                modContainer.classList.remove('hidden');
+                document.getElementById('modifiedCount').innerText = `${data.modified_words_report.count} كلمة/جملة`;
+                document.getElementById('modificationAdvice').innerText = data.modified_words_report.advice || 'حاول تجنب هذه الكلمات مستقبلاً.';
+                
+                const modsHtml = (data.modified_words_report.modifications || []).map(mod => `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between bg-slate-950 p-3.5 rounded-xl border border-slate-800/60 gap-3 hover:border-amber-500/30 transition">
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                            <span class="line-through decoration-rose-500 text-rose-300 text-sm bg-rose-500/10 px-3 py-1.5 rounded-lg font-medium">${mod.original}</span>
+                            <i class="fa-solid fa-arrow-left-long text-slate-500"></i>
+                            <span class="text-emerald-400 text-sm bg-emerald-500/10 px-3 py-1.5 rounded-lg font-bold shadow-inner">${mod.changed_to}</span>
+                        </div>
+                        <div class="text-xs text-slate-400 md:text-left flex-1 bg-slate-900/50 p-2 rounded-lg border border-slate-800 border-dashed">
+                            <i class="fa-solid fa-circle-info text-slate-500 ml-1"></i> ${mod.reason}
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('modificationsList').innerHTML = modsHtml;
+            } else {
+                modContainer.classList.add('hidden');
+            }
 
             // Issues
             const issuesContainer = document.getElementById('issuesContainer');
