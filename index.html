@@ -183,25 +183,12 @@
                 <i class="fa-solid fa-pen-nib ml-2"></i> مُحلل النصوص
             </h3>
             
-            <!-- Content Type -->
+            <!-- Custom Prompt / Objective Box -->
             <div class="mb-6">
                 <label class="text-sm font-bold text-slate-300 mb-3 flex items-center">
-                    <i class="fa-solid fa-shapes ml-2 text-purple-400"></i> نوع المحتوى (الهدف):
+                    <i class="fa-solid fa-bullseye ml-2 text-purple-400"></i> وصف الهدف من البوست (أمر للذكاء الاصطناعي):
                 </label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <button onclick="setPostType('general', this)" class="type-btn active bg-indigo-600/20 text-indigo-300 border-indigo-500 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition">
-                        <i class="fa-regular fa-comments mb-2 text-lg"></i> عام
-                    </button>
-                    <button onclick="setPostType('marketing', this)" class="type-btn bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800">
-                        <i class="fa-solid fa-bag-shopping mb-2 text-lg"></i> تسويق وبيع
-                    </button>
-                    <button onclick="setPostType('education', this)" class="type-btn bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800">
-                        <i class="fa-solid fa-book-open mb-2 text-lg"></i> تعليمي
-                    </button>
-                    <button onclick="setPostType('entertainment', this)" class="type-btn bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800">
-                        <i class="fa-solid fa-film mb-2 text-lg"></i> ترفيهي
-                    </button>
-                </div>
+                <input type="text" id="customPrompt" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none focus:border-indigo-500 transition" placeholder="مثال: عايز بوست ساخر، أو بوست جد جداً بيناقش مشكلة، أو تسويق لمنتج...">
             </div>
 
             <!-- Settings Toggles -->
@@ -341,7 +328,7 @@
                 <i class="fa-regular fa-comments ml-2"></i> 💬 الرد السريع الآلي
             </h3>
             
-            <p class="text-sm text-slate-400 mb-6">انسخ تعليق العميل هنا، وسنقوم بتوليد رد بالعامية المصرية مختصر جداً ومناسب للموقف.</p>
+            <p class="text-sm text-slate-400 mb-6">انسخ تعليق العميل أو البوست هنا، وسنقوم بتوليد رد بالعامية المصرية مختصر جداً كأنك بترد من حسابك الشخصي.</p>
 
             <!-- Reply Settings Toggles -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -440,7 +427,6 @@
         }
         
         let currentState = {
-            postType: 'general',
             tone: 'egyptian',
             useEmojis: true,
             addQuestion: true
@@ -449,13 +435,6 @@
         let replyState = {
             tone: 'funny',
             animation: true
-        };
-
-        const CONTENT_TYPES = {
-            general: "محتوى عام يعتمد على مشاركة الأفكار اليومية والنقاشات.",
-            marketing: "محتوى تسويقي/بيعي يهدف إلى إقناع العميل بمنتج أو خدمة.",
-            education: "محتوى تعليمي يهدف إلى تبسيط معلومة أو مشاركة خبرة بشكل منظم.",
-            entertainment: "محتوى ترفيهي/فكاهي يهدف إلى رسم الابتسامة وزيادة التفاعل."
         };
 
         // --- 2. Image Watermark Logic (With FB Logo) ---
@@ -528,13 +507,6 @@
                 btn.className = `${className} ${inactiveClasses}`;
             });
             activeElement.className = `${className} ${activeClass}`;
-        }
-
-        function setPostType(type, element) {
-            currentState.postType = type;
-            const activeClass = "active bg-indigo-600/20 text-indigo-300 border-indigo-500 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition";
-            const inactiveClass = "bg-slate-950 text-slate-400 border-slate-800 border flex flex-col items-center py-3 rounded-xl text-sm font-bold transition hover:bg-slate-800";
-            updateButtons('type-btn', element, activeClass, inactiveClass);
         }
 
         function setTone(tone, element) {
@@ -629,16 +601,18 @@
             const inputText = document.getElementById('inputText').value.trim();
             if (!inputText) return showError("الرجاء إدخال النص أولاً.");
 
+            // جلب وصف أو هدف البوست المدخل من قبل المستخدم
+            const customGoal = document.getElementById('customPrompt').value.trim() || 'صياغة بوست طبيعي وجذاب';
+
             document.getElementById('analyzeBtn').disabled = true;
             document.getElementById('btnText').classList.add('hidden');
             document.getElementById('btnLoading').classList.remove('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
 
-            // تحديث الـ Prompt ليكون أكثر صرامة في الحفاظ على فكرة المستخدم ومنع الحشو
             const systemPrompt = `أنت خبير في معايير مجتمع فيسبوك. مهمتك إعادة صياغة النص مع الحفاظ الصارم على فكرة المستخدم ومقصده (إذا كان ينتقد أو يسخر من شيء، حافظ على النقد والسخرية ولا تحولها لقصة أخرى أبداً).
-نوع المحتوى: ${CONTENT_TYPES[currentState.postType]}
+الهدف والوصف المطلوب للبوست: ${customGoal}
 الشروط القاطعة:
-1- الفكرة: لا تؤلف قصة جديدة! حافظ على سياق النص الأصلي 100%. (مثال: لو المستخدم يسخر من نظام يبيح السجائر، يجب أن يكون البوست عن هذا الموضوع بالتحديد).
+1- الفكرة: لا تؤلف قصة جديدة! حافظ على سياق النص الأصلي 100%.
 2- الضمير: استخدم صيغة المتكلم المفرد ("أنا") ولا تستخدم صيغة الجمع ("نحن" أو "إحنا") إطلاقاً إلا إذا كان النص الأصلي بصيغة الجمع.
 3- الطول: البوست يجب أن يكون مختصراً، مباشراً، وغير ممل. لا تضف ديباجات تسويقية مبالغ فيها.
 4- الأسلوب: اجعل الكلام طبيعياً كأنه شخص يكتب على حسابه الشخصي، بدون عبارات مصطنعة مثل (يسعدنا الرد عليكم، شاركونا في التعليقات).
@@ -720,16 +694,17 @@
             document.getElementById('replyResultSection').classList.add('hidden');
             document.getElementById('replyResultSection').classList.remove('animate-pop-in'); // Reset animation
 
-            const tonePrompt = replyState.tone === 'funny' ? 'فكاهي، مضحك، لطيف، وبيهزر (بشكل محترم)' : 'جدي، احترافي، مباشر، ومحترم جداً';
+            const tonePrompt = replyState.tone === 'funny' ? 'فكاهي بيهزر (بس مش مبتذل)' : 'جدي ومباشر';
             const emojiPrompt = replyState.animation ? 'استخدم إيموجي معبرة جداً وكثيرة تناسب الرد' : 'بدون استخدام أي إيموجي أو رموز نهائياً';
 
-            const systemPrompt = `أنت تدير صفحة فيسبوك في مصر وترد على تعليقات أو منشورات المتابعين.
+            const systemPrompt = `أنت شخص مصري عادي جداً (مواطن عادي مش شركة ولا صفحة ولا خدمة عملاء) بترد على تعليق أو بوست على فيسبوك.
 شروط الرد:
-1- اللهجة: عامية مصرية فقط (طبيعية جداً زي ما المصريين بيكلموا بعض على السوشيال ميديا).
-2- الطول: مختصر جداً جداً جداً (جملة واحدة أو اثنتين بحد أقصى، لا تطل في الكلام أبداً).
-3- الأسلوب: ${tonePrompt}.
-4- الإيموجي/الأنيميشن: ${emojiPrompt}.
-اكتب الرد مباشرة وبدون أي مقدمات أو شرح.`;
+1- الشخصية: إنت شخص بيكتب من حسابه الشخصي. ممنوع تماماً استخدام لغة الشركات والتسويق أو خدمة العملاء (زي: بنشكر اهتمامك، تابعنا، فريق العمل، يسعدنا).
+2- اللهجة: عامية مصرية طبيعية جداً 100% زي اللي بنكتبها لبعض في الشات.
+3- الطول: قصير جداً، جملة أو جملتين بالكتير، في الصميم ومباشر.
+4- الأسلوب: ${tonePrompt}.
+5- الإيموجي/الأنيميشن: ${emojiPrompt}.
+اكتب الرد مباشرة وبدون أي مقدمات أو شرح للي هتعمله.`;
 
             const payload = {
                 contents: [{ parts: [{ text: `التعليق أو المنشور: "${inputText}"` }] }],
