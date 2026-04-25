@@ -172,16 +172,21 @@
                     <canvas id="watermarkCanvas" class="max-w-full max-h-[500px] rounded-xl shadow-lg"></canvas>
                 </div>
                 <button onclick="downloadImage()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-md transition flex items-center justify-center">
-                    <i class="fa-solid fa-download ml-2"></i> تحميل الصورة النهائية
+                    <i class="fa-solid fa-download ml-2"></i> تحميل الصورة / مشاركة
                 </button>
             </div>
         </div>
 
         <!-- Input & Settings Section -->
         <div class="bg-slate-900 rounded-3xl p-5 md:p-8 shadow-xl border border-slate-800">
-            <h3 class="text-xl font-bold text-indigo-400 mb-6 flex items-center">
-                <i class="fa-solid fa-pen-nib ml-2"></i> مُحلل النصوص
-            </h3>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-indigo-400 flex items-center">
+                    <i class="fa-solid fa-pen-nib ml-2"></i> مُحلل النصوص
+                </h3>
+                <button onclick="clearAllInputs()" class="text-sm text-slate-400 hover:text-rose-400 transition flex items-center px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-rose-900/50">
+                    <i class="fa-solid fa-trash-can ml-1"></i> مسح الكل
+                </button>
+            </div>
             
             <!-- Custom Prompt / Objective Box -->
             <div class="mb-6">
@@ -229,11 +234,13 @@
                 <i class="fa-solid fa-triangle-exclamation ml-2"></i> <span id="errorText"></span>
             </div>
 
-            <!-- Submit Button -->
-            <button id="analyzeBtn" onclick="analyzeContent()" class="w-full relative overflow-hidden flex items-center justify-center py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-l from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-600/25 transition-all disabled:opacity-50">
-                <span id="btnText"><i class="fa-solid fa-wand-magic-sparkles ml-2"></i> تحليل وصياغة المنشور</span>
-                <span id="btnLoading" class="hidden"><i class="fa-solid fa-spinner fa-spin ml-2"></i> جاري الاتصال بالذكاء الاصطناعي...</span>
-            </button>
+            <!-- Submit Button & Clear -->
+            <div class="flex flex-col md:flex-row gap-3">
+                <button id="analyzeBtn" onclick="analyzeContent()" class="flex-1 relative overflow-hidden flex items-center justify-center py-4 px-6 rounded-2xl font-black text-white bg-gradient-to-l from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-600/25 transition-all disabled:opacity-50">
+                    <span id="btnText"><i class="fa-solid fa-wand-magic-sparkles ml-2"></i> تحليل وصياغة المنشور</span>
+                    <span id="btnLoading" class="hidden"><i class="fa-solid fa-spinner fa-spin ml-2"></i> جاري الاتصال بالذكاء الاصطناعي...</span>
+                </button>
+            </div>
         </div>
 
         <!-- Results Section (Hidden by default) -->
@@ -374,8 +381,11 @@
             </div>
 
             <!-- Reply Text Area -->
-            <div class="mb-6">
+            <div class="mb-6 relative">
                 <textarea id="replyInputText" rows="3" class="w-full rounded-2xl border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 p-4 bg-slate-950 text-slate-100 placeholder-slate-600 resize-none transition" placeholder="الصق تعليق العميل أو البوست هنا..."></textarea>
+                <button onclick="clearReplyInput()" class="absolute top-3 left-3 text-slate-500 hover:text-rose-400 transition" title="مسح النص">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
             <!-- Error Message for Replies -->
@@ -405,12 +415,10 @@
     <!-- Application Logic -->
     <script>
         // --- 1. State Variables & Key Management ---
-        // استدعاء المفتاح من ذاكرة المتصفح إذا كان المستخدم قد حفظه سابقاً
         let apiKey = localStorage.getItem('facebook_analyzer_api_key') || ""; 
         let aiModel = localStorage.getItem('facebook_analyzer_ai_model') || "gemini-2.5-flash"; 
 
         document.addEventListener("DOMContentLoaded", () => {
-            // تعبئة الحقول تلقائياً إذا كانت البيانات محفوظة
             if (apiKey) {
                 document.getElementById('apiKeyValue').value = apiKey;
             }
@@ -436,17 +444,14 @@
                 return;
             }
 
-            // تحديث المتغيرات
             apiKey = inputKey;
             aiModel = inputModel;
 
-            // حفظ في المتصفح لكي لا يضيع عند عمل ريفريش
             localStorage.setItem('facebook_analyzer_api_key', apiKey);
             localStorage.setItem('facebook_analyzer_ai_model', aiModel);
 
             closeSettingsModal();
             
-            // إخفاء رسالة الخطأ إن وجدت
             document.getElementById('errorMsg').classList.add('hidden');
             document.getElementById('replyErrorMsg').classList.add('hidden');
         }
@@ -461,7 +466,7 @@
             animation: true
         };
 
-        // --- 2. Image Watermark Logic (With FB Logo) ---
+        // --- 2. Image Watermark Logic (With FB Logo & APK Support) ---
         const fbLogoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`;
         const fbLogoDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fbLogoSvg);
 
@@ -512,6 +517,20 @@
             fbLogo.onload = function() {
                 ctx.drawImage(fbLogo, startX, textY - (logoSize / 2), logoSize, logoSize);
                 ctx.fillText(watermarkText, startX + logoSize + spacing, textY);
+                
+                // --- التعديل الخاص بالـ APK يبدأ هنا ---
+                // تحويل الكانفاس إلى صورة حقيقية (img) لدعم ميزة (الضغط المطول للحفظ)
+                let imgElement = document.getElementById('previewRealImage');
+                if (!imgElement) {
+                    imgElement = document.createElement('img');
+                    imgElement.id = 'previewRealImage';
+                    imgElement.className = canvas.className; // نقل نفس تصميم الكانفاس
+                    canvas.parentNode.appendChild(imgElement);
+                    canvas.style.display = 'none'; // إخفاء الكانفاس الأصلي لأنه لا يدعم الضغط المطول
+                }
+                imgElement.src = canvas.toDataURL('image/png', 1.0);
+                // --- نهاية التعديل ---
+
                 document.getElementById('imagePreviewContainer').classList.remove('hidden');
             };
             fbLogo.src = fbLogoDataUrl;
@@ -519,13 +538,37 @@
 
         function downloadImage() {
             const canvas = document.getElementById('watermarkCanvas');
-            const link = document.createElement('a');
-            link.download = 'khaledmohyalden-watermark.png';
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
+
+            // محاولة استخدام واجهة المشاركة الأصلية للموبايل (Share API)
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], 'khaled-watermark.png', { type: 'image/png' });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    // فتح نافذة المشاركة الخاصة بالأندرويد
+                    navigator.share({
+                        files: [file],
+                        title: 'الصورة النهائية',
+                        text: 'تم إضافة العلامة المائية عبر محلل فيسبوك'
+                    }).catch((error) => {
+                        // إذا أغلق المستخدم النافذة أو حدث خطأ
+                        alert("لحفظ الصورة داخل التطبيق:\nيرجى 'الضغط مطولاً' (Long Press) بأصبعك على الصورة، ثم اختر 'حفظ الصورة' (Save Image).");
+                    });
+                } else {
+                    // الطريقة التقليدية للمتصفحات العادية كحل احتياطي
+                    try {
+                        const link = document.createElement('a');
+                        link.download = 'khaledmohyalden-watermark.png';
+                        link.href = canvas.toDataURL('image/png', 1.0);
+                        link.click();
+                    } catch(e) {}
+                    
+                    // تنبيه فوري لمستخدمي الـ APK
+                    alert("لحفظ الصورة داخل التطبيق:\nيرجى 'الضغط مطولاً' (Long Press) بأصبعك على الصورة، ثم اختر 'حفظ الصورة' (Save Image).");
+                }
+            }, 'image/png', 1.0);
         }
 
-        // --- 3. UI Update Functions ---
+        // --- 3. UI Update Functions & Clear Logic ---
         function updateButtons(className, activeElement, activeClass, inactiveClasses) {
             document.querySelectorAll('.' + className).forEach(btn => {
                 btn.className = `${className} ${inactiveClasses}`;
@@ -548,10 +591,25 @@
             updateButtons('cta-btn', element, "cta-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "cta-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
         }
 
-        // Reply UI Setters
         function setReplyAnimation(use, element) {
             replyState.animation = use;
             updateButtons('reply-anim-btn', element, "reply-anim-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "reply-anim-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
+        }
+
+        // دالة مسح كل المدخلات في قسم المحلل
+        function clearAllInputs() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('customPrompt').value = '';
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('errorMsg').classList.add('hidden');
+        }
+
+        // دالة مسح نص قسم الردود
+        function clearReplyInput() {
+            document.getElementById('replyInputText').value = '';
+            document.getElementById('customReplyPrompt').value = '';
+            document.getElementById('replyResultSection').classList.add('hidden');
+            document.getElementById('replyErrorMsg').classList.add('hidden');
         }
 
         function showError(msg) {
@@ -610,7 +668,6 @@
 
         // --- Post Analyzer ---
         async function analyzeContent() {
-            // التحقق من وجود المفتاح أولاً
             if (!apiKey) {
                 showError("يرجى إدخال مفتاح الذكاء الاصطناعي API Key من أيقونة الإعدادات ⚙️ أعلى الشاشة أولاً.");
                 openSettingsModal();
@@ -620,7 +677,6 @@
             const inputText = document.getElementById('inputText').value.trim();
             if (!inputText) return showError("الرجاء إدخال النص أولاً.");
 
-            // جلب وصف أو هدف البوست المدخل من قبل المستخدم
             const userPromptGoal = document.getElementById('customPrompt').value.trim();
 
             document.getElementById('analyzeBtn').disabled = true;
@@ -684,7 +740,6 @@
             };
 
             try {
-                // استخدام الموديل الديناميكي والمفتاح
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${apiKey}`;
                 const response = await fetchWithRetry(url, {
                     method: 'POST',
@@ -699,7 +754,6 @@
 
             } catch (err) {
                 console.error("تفاصيل الخطأ:", err);
-                // رسالة خطأ ذكية توضح المشكلة
                 if (err.message.includes("API key not valid")) {
                     showError("مفتاح API غير صحيح أو به خطأ، يرجى التحقق منه من الإعدادات.");
                     openSettingsModal();
@@ -727,14 +781,13 @@
             const inputText = document.getElementById('replyInputText').value.trim();
             if (!inputText) return showReplyError("الرجاء إدخال التعليق أو المنشور المطلوب الرد عليه أولاً.");
 
-            // جلب أمر الرد المخصص
             const customReplyGoal = document.getElementById('customReplyPrompt').value.trim();
 
             document.getElementById('generateReplyBtn').disabled = true;
             document.getElementById('replyBtnText').classList.add('hidden');
             document.getElementById('replyBtnLoading').classList.remove('hidden');
             document.getElementById('replyResultSection').classList.add('hidden');
-            document.getElementById('replyResultSection').classList.remove('animate-pop-in'); // Reset animation
+            document.getElementById('replyResultSection').classList.remove('animate-pop-in');
 
             const emojiPrompt = replyState.animation ? 'استخدم إيموجي معبرة جداً وكثيرة تناسب الرد' : 'بدون استخدام أي إيموجي أو رموز نهائياً';
 
@@ -779,7 +832,6 @@
                 const resultBox = document.getElementById('replyResultSection');
                 resultBox.classList.remove('hidden');
 
-                // إضافة أنيميشن في حال اختيار تفعيله
                 if (replyState.animation) {
                     resultBox.classList.add('animate-pop-in');
                 }
@@ -835,7 +887,7 @@
             document.getElementById('viralityScore').innerText = score;
             document.getElementById('viralityReason').innerText = data.virality_reason;
 
-            // Modified Words Report UI (القسم الجديد للكلمات المعدلة)
+            // Modified Words Report UI
             const modContainer = document.getElementById('modifiedWordsContainer');
             if (data.modified_words_report && data.modified_words_report.count > 0) {
                 modContainer.classList.remove('hidden');
