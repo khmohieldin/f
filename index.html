@@ -34,6 +34,23 @@
 </head>
 <body class="bg-slate-950 text-slate-200 min-h-screen p-4 md:p-8 selection:bg-indigo-500/30">
 
+    <!-- نافذة عرض الصورة النهائية للتحميل أو السكرين شوت (الجديدة) -->
+    <div id="imageFullscreenModal" class="fixed inset-0 bg-black z-[200] hidden flex-col">
+        <!-- شريط علوي -->
+        <div class="w-full flex justify-between items-center p-4 bg-slate-900 border-b border-slate-800">
+            <p class="text-emerald-400 font-bold text-sm md:text-base flex items-center">
+                <i class="fa-solid fa-mobile-screen ml-2"></i> اضغط مطولاً للحفظ، أو التقط شاشة (Screenshot)
+            </p>
+            <button onclick="closeImageFullscreen()" class="w-10 h-10 bg-slate-800 hover:bg-rose-600 rounded-xl flex items-center justify-center transition text-white shadow-lg" title="رجوع للتطبيق">
+                <i class="fa-solid fa-arrow-right text-lg"></i>
+            </button>
+        </div>
+        <!-- مساحة الصورة -->
+        <div class="flex-1 w-full overflow-auto flex items-center justify-center p-2 bg-black">
+            <img id="finalFullscreenImage" class="max-w-full block select-none" />
+        </div>
+    </div>
+
     <!-- النافذة المنبثقة الخارجية للمفتاح -->
     <div id="settingsModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center backdrop-blur-sm px-4">
         <div class="bg-slate-900 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md overflow-hidden transform transition-all">
@@ -168,12 +185,12 @@
 
             <!-- Preview & Download -->
             <div id="imagePreviewContainer" class="hidden flex flex-col items-center space-y-4 mt-6">
-                <p class="text-xs text-amber-400 mb-1 font-bold"><i class="fa-solid fa-circle-info"></i> لمستخدمي التطبيق: يمكنك الضغط على الصورة لفتحها في نافذة التحميل</p>
+                <p class="text-xs text-amber-400 mb-1 font-bold"><i class="fa-solid fa-circle-info"></i> لمستخدمي التطبيق: يمكنك الضغط على الزر بالأسفل لعرض الصورة بحجم الشاشة</p>
                 <div class="relative w-full flex justify-center bg-slate-950 p-4 rounded-2xl border border-slate-800">
                     <canvas id="watermarkCanvas" class="max-w-full max-h-[500px] rounded-xl shadow-lg"></canvas>
                 </div>
                 <button onclick="downloadImage()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-md transition flex items-center justify-center">
-                    <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i> فتح للتحميل / مشاركة
+                    <i class="fa-solid fa-expand ml-2"></i> عرض الصورة النهائية للحفظ
                 </button>
             </div>
         </div>
@@ -519,158 +536,28 @@
                 ctx.drawImage(fbLogo, startX, textY - (logoSize / 2), logoSize, logoSize);
                 ctx.fillText(watermarkText, startX + logoSize + spacing, textY);
                 
-                // --- التعديل الخاص بفتح الصورة في نافذة جديدة (دعم APK) ---
-                let imgElement = document.getElementById('previewRealImage');
-                if (!imgElement) {
-                    imgElement = document.createElement('img');
-                    imgElement.id = 'previewRealImage';
-                    // إضافة تأثيرات ومؤشر يوضح أنها قابلة للضغط
-                    imgElement.className = canvas.className + " cursor-pointer hover:opacity-80 transition hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]"; 
-                    imgElement.title = "اضغط هنا لفتح الصورة في نافذة للتحميل";
-                    // عند الضغط على الصورة، يتم فتح نافذة منبثقة جديدة للتحميل
-                    imgElement.onclick = () => openImageInNewTab(canvas.toDataURL('image/png', 1.0));
-                    
-                    canvas.parentNode.appendChild(imgElement);
-                    canvas.style.display = 'none'; // إخفاء الكانفاس لأنه غير تفاعلي
-                }
-                imgElement.src = canvas.toDataURL('image/png', 1.0);
-                // --- نهاية التعديل ---
-
                 document.getElementById('imagePreviewContainer').classList.remove('hidden');
             };
             fbLogo.src = fbLogoDataUrl;
         }
 
-        // دالة فتح الصورة في متصفح خارجي أو نافذة جديدة
-        function openImageInNewTab(dataUrl) {
-            if (!dataUrl) {
-                const canvas = document.getElementById('watermarkCanvas');
-                dataUrl = canvas.toDataURL('image/png', 1.0);
-            }
-            
-            // فتح نافذة منبثقة جديدة
-            const newWindow = window.open('', '_blank');
-            
-            if (newWindow) {
-                newWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html lang="ar" dir="rtl">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>حفظ الصورة النهائية</title>
-                        <style>
-                            body { 
-                                background-color: #0f172a; 
-                                color: white; 
-                                display: flex; 
-                                flex-direction: column; 
-                                align-items: center; 
-                                justify-content: flex-start; 
-                                min-height: 100vh; 
-                                margin: 0; 
-                                font-family: sans-serif;
-                                padding: 20px;
-                                text-align: center;
-                                box-sizing: border-box;
-                            }
-                            .header {
-                                width: 100%;
-                                display: flex;
-                                justify-content: flex-start;
-                                margin-bottom: 20px;
-                            }
-                            .back-btn {
-                                background: #4f46e5;
-                                color: white;
-                                border: none;
-                                padding: 12px 20px;
-                                border-radius: 12px;
-                                font-size: 1rem;
-                                font-weight: bold;
-                                cursor: pointer;
-                                display: inline-flex;
-                                align-items: center;
-                                gap: 8px;
-                                box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-                                transition: all 0.2s ease;
-                            }
-                            .back-btn:active {
-                                transform: scale(0.95);
-                                background: #4338ca;
-                            }
-                            img { 
-                                max-width: 100%; 
-                                height: auto; 
-                                border-radius: 12px; 
-                                box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-                                margin-top: 10px;
-                            }
-                            .alert {
-                                background: #10b981;
-                                color: white;
-                                padding: 15px 20px;
-                                border-radius: 12px;
-                                font-weight: bold;
-                                font-size: 1.1rem;
-                                line-height: 1.6;
-                                max-width: 90%;
-                                border: 2px solid #059669;
-                                margin-bottom: 15px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <button class="back-btn" onclick="window.close(); window.history.back();">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                                </svg>
-                                رجوع للتطبيق
-                            </button>
-                        </div>
-                        <div class="alert">
-                            ✅ تم فتح الصورة بنجاح!<br>
-                            اضغط مطولاً (Long Press) بأصبعك على الصورة بالأسفل ثم اختر "حفظ الصورة" أو "Download Image".
-                        </div>
-                        <img src="${dataUrl}" alt="Watermarked Image">
-                    </body>
-                    </html>
-                `);
-                newWindow.document.close();
-            } else {
-                // كحل بديل أخير إذا كان التطبيق يمنع النوافذ المنبثقة تماماً
-                const link = document.createElement('a');
-                link.href = dataUrl;
-                link.download = 'khaledmohyalden-watermark.png';
-                link.click();
-                alert("لم يتمكن التطبيق من فتح نافذة جديدة. يرجى الضغط مطولاً على الصورة الظاهرة بالشاشة نفسها لحفظها.");
-            }
+        // إغلاق نافذة الشاشة الكاملة
+        function closeImageFullscreen() {
+            document.getElementById('imageFullscreenModal').classList.add('hidden');
+            document.getElementById('imageFullscreenModal').classList.remove('flex');
         }
 
-        // دالة التحميل المعدلة (محاولة المشاركة ثم فتح نافذة)
+        // دالة عرض الصورة في الشاشة الكاملة (للسكرين شوت أو الحفظ المطول)
         function downloadImage() {
             const canvas = document.getElementById('watermarkCanvas');
             const dataUrl = canvas.toDataURL('image/png', 1.0);
 
-            // محاولة استخدام واجهة المشاركة الأصلية للموبايل (Share API) - ممتازة للـ APK
-            canvas.toBlob(function(blob) {
-                const file = new File([blob], 'khaled-watermark.png', { type: 'image/png' });
-
-                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({
-                        files: [file],
-                        title: 'الصورة النهائية',
-                        text: 'تم إضافة العلامة المائية عبر محلل فيسبوك'
-                    }).catch((error) => {
-                        // إذا أغلق المستخدم النافذة أو لم تنجح المشاركة، نلجأ لفتح النافذة المنبثقة
-                        openImageInNewTab(dataUrl);
-                    });
-                } else {
-                    // المتصفح لا يدعم المشاركة، افتح النافذة المنبثقة فوراً
-                    openImageInNewTab(dataUrl);
-                }
-            }, 'image/png', 1.0);
+            // وضع الصورة في نافذة العرض الداخلي
+            document.getElementById('finalFullscreenImage').src = dataUrl;
+            
+            // إظهار النافذة
+            document.getElementById('imageFullscreenModal').classList.remove('hidden');
+            document.getElementById('imageFullscreenModal').classList.add('flex');
         }
 
         // --- 3. UI Update Functions & Clear Logic ---
