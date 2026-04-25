@@ -352,17 +352,18 @@
                 <i class="fa-regular fa-comments ml-2"></i> 💬 الرد السريع الآلي
             </h3>
             
-            <p class="text-sm text-slate-400 mb-6">انسخ تعليق العميل أو البوست هنا، وسنقوم بتوليد رد بالعامية المصرية مختصر جداً كأنك بترد من حسابك الشخصي.</p>
+            <p class="text-sm text-slate-400 mb-6">انسخ تعليق العميل أو البوست هنا، واكتب في الصندوق أمر للذكاء الاصطناعي يوصف عايز الرد يكون إزاي.</p>
+
+            <!-- Custom Reply Prompt Box -->
+            <div class="mb-6">
+                <label class="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                    <i class="fa-solid fa-bullseye ml-2 text-emerald-400"></i> وصف هدف الرد (أمر للذكاء الاصطناعي):
+                </label>
+                <input type="text" id="customReplyPrompt" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none focus:border-emerald-500 transition" placeholder="مثال: رد عليه بسخرية، أو اشرح له وجهة نظري بهدوء، أو بين له إن كلامه غلط...">
+            </div>
 
             <!-- Reply Settings Toggles -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <!-- Tone -->
-                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800">
-                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl">
-                        <button onclick="setReplyTone('funny', this)" class="reply-tone-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition">فكاهي 😂</button>
-                        <button onclick="setReplyTone('serious', this)" class="reply-tone-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition">جدي 👔</button>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 gap-4 mb-6">
                 <!-- Animations / Emojis -->
                 <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800">
                     <div class="flex gap-1 bg-slate-900 p-1 rounded-xl">
@@ -457,7 +458,6 @@
         };
 
         let replyState = {
-            tone: 'funny',
             animation: true
         };
 
@@ -549,11 +549,6 @@
         }
 
         // Reply UI Setters
-        function setReplyTone(tone, element) {
-            replyState.tone = tone;
-            updateButtons('reply-tone-btn', element, "reply-tone-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "reply-tone-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
-        }
-
         function setReplyAnimation(use, element) {
             replyState.animation = use;
             updateButtons('reply-anim-btn', element, "reply-anim-btn active flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white shadow-md transition", "reply-anim-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition");
@@ -732,23 +727,26 @@
             const inputText = document.getElementById('replyInputText').value.trim();
             if (!inputText) return showReplyError("الرجاء إدخال التعليق أو المنشور المطلوب الرد عليه أولاً.");
 
+            // جلب أمر الرد المخصص
+            const customReplyGoal = document.getElementById('customReplyPrompt').value.trim();
+
             document.getElementById('generateReplyBtn').disabled = true;
             document.getElementById('replyBtnText').classList.add('hidden');
             document.getElementById('replyBtnLoading').classList.remove('hidden');
             document.getElementById('replyResultSection').classList.add('hidden');
             document.getElementById('replyResultSection').classList.remove('animate-pop-in'); // Reset animation
 
-            const tonePrompt = replyState.tone === 'funny' ? 'فكاهي بيهزر (بس مش مبتذل)' : 'جدي ومباشر';
             const emojiPrompt = replyState.animation ? 'استخدم إيموجي معبرة جداً وكثيرة تناسب الرد' : 'بدون استخدام أي إيموجي أو رموز نهائياً';
 
             const systemPrompt = `أنت شخص مصري عادي جداً (مواطن عادي مش شركة ولا صفحة ولا خدمة عملاء) بترد على تعليق أو بوست على فيسبوك.
-شروط الرد:
-1- الشخصية: إنت شخص بيكتب من حسابه الشخصي. ممنوع تماماً استخدام لغة الشركات والتسويق أو خدمة العملاء (زي: بنشكر اهتمامك، تابعنا، فريق العمل، يسعدنا).
+الأولوية المطلقة: تنفيذ الأمر التالي بدقة في ردك:
+(( ${customReplyGoal ? customReplyGoal : 'رد بشكل طبيعي ومناسب للسياق بالعامية المصرية'} ))
+
+تعليمات إرشادية عامة (إلا إذا تعارضت مع أمرك الأساسي بالأعلى):
+1- الشخصية: إنت شخص بيكتب من حسابه الشخصي. ممنوع تماماً استخدام لغة الشركات والتسويق أو خدمة العملاء (زي: بنشكر اهتمامك، تابعنا، فريق العمل).
 2- اللهجة: عامية مصرية طبيعية جداً 100% زي اللي بنكتبها لبعض في الشات.
-3- الطول: قصير جداً، جملة أو جملتين بالكتير، في الصميم ومباشر.
-4- الأسلوب: ${tonePrompt}.
-5- الإيموجي/الأنيميشن: ${emojiPrompt}.
-اكتب الرد مباشرة وبدون أي مقدمات أو شرح للي هتعمله.`;
+3- الإيموجي/الأنيميشن: ${emojiPrompt}.
+اكتب الرد مباشرة وبدون أي مقدمات أو شرح.`;
 
             const payload = {
                 contents: [{ parts: [{ text: `التعليق أو المنشور: "${inputText}"` }] }],
