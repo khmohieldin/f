@@ -94,7 +94,7 @@
             </p>
         </div>
 
-        <!-- قسم دليل معايير فيسبوك المضاف حديثاً -->
+        <!-- قسم دليل معايير فيسبوك -->
         <div class="bg-slate-900 rounded-3xl p-5 md:p-8 shadow-xl border border-slate-800">
             <div class="flex justify-between items-center cursor-pointer group" onclick="document.getElementById('fbGuideContent').classList.toggle('hidden'); document.getElementById('fbGuideArrow').classList.toggle('rotate-180');">
                 <div>
@@ -168,11 +168,12 @@
 
             <!-- Preview & Download -->
             <div id="imagePreviewContainer" class="hidden flex flex-col items-center space-y-4 mt-6">
+                <p class="text-xs text-amber-400 mb-1 font-bold"><i class="fa-solid fa-circle-info"></i> لمستخدمي التطبيق: يمكنك الضغط على الصورة لفتحها في نافذة التحميل</p>
                 <div class="relative w-full flex justify-center bg-slate-950 p-4 rounded-2xl border border-slate-800">
                     <canvas id="watermarkCanvas" class="max-w-full max-h-[500px] rounded-xl shadow-lg"></canvas>
                 </div>
                 <button onclick="downloadImage()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-md transition flex items-center justify-center">
-                    <i class="fa-solid fa-download ml-2"></i> تحميل الصورة / مشاركة
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i> فتح للتحميل / مشاركة
                 </button>
             </div>
         </div>
@@ -353,7 +354,7 @@
             </div>
         </div>
 
-        <!-- قسم الرد السريع على التعليقات الجديد -->
+        <!-- قسم الرد السريع على التعليقات -->
         <div class="bg-slate-900 rounded-3xl p-5 md:p-8 shadow-xl border border-slate-800 mt-6">
             <h3 class="text-xl font-bold text-emerald-400 mb-6 flex items-center">
                 <i class="fa-regular fa-comments ml-2"></i> 💬 الرد السريع الآلي
@@ -466,7 +467,7 @@
             animation: true
         };
 
-        // --- 2. Image Watermark Logic (With FB Logo & APK Support) ---
+        // --- 2. Image Watermark Logic (With Pop-up Browser Support) ---
         const fbLogoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`;
         const fbLogoDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fbLogoSvg);
 
@@ -518,15 +519,19 @@
                 ctx.drawImage(fbLogo, startX, textY - (logoSize / 2), logoSize, logoSize);
                 ctx.fillText(watermarkText, startX + logoSize + spacing, textY);
                 
-                // --- التعديل الخاص بالـ APK يبدأ هنا ---
-                // تحويل الكانفاس إلى صورة حقيقية (img) لدعم ميزة (الضغط المطول للحفظ)
+                // --- التعديل الخاص بفتح الصورة في نافذة جديدة (دعم APK) ---
                 let imgElement = document.getElementById('previewRealImage');
                 if (!imgElement) {
                     imgElement = document.createElement('img');
                     imgElement.id = 'previewRealImage';
-                    imgElement.className = canvas.className; // نقل نفس تصميم الكانفاس
+                    // إضافة تأثيرات ومؤشر يوضح أنها قابلة للضغط
+                    imgElement.className = canvas.className + " cursor-pointer hover:opacity-80 transition hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]"; 
+                    imgElement.title = "اضغط هنا لفتح الصورة في نافذة للتحميل";
+                    // عند الضغط على الصورة، يتم فتح نافذة منبثقة جديدة للتحميل
+                    imgElement.onclick = () => openImageInNewTab(canvas.toDataURL('image/png', 1.0));
+                    
                     canvas.parentNode.appendChild(imgElement);
-                    canvas.style.display = 'none'; // إخفاء الكانفاس الأصلي لأنه لا يدعم الضغط المطول
+                    canvas.style.display = 'none'; // إخفاء الكانفاس لأنه غير تفاعلي
                 }
                 imgElement.src = canvas.toDataURL('image/png', 1.0);
                 // --- نهاية التعديل ---
@@ -536,34 +541,100 @@
             fbLogo.src = fbLogoDataUrl;
         }
 
+        // دالة فتح الصورة في متصفح خارجي أو نافذة جديدة
+        function openImageInNewTab(dataUrl) {
+            if (!dataUrl) {
+                const canvas = document.getElementById('watermarkCanvas');
+                dataUrl = canvas.toDataURL('image/png', 1.0);
+            }
+            
+            // فتح نافذة منبثقة جديدة
+            const newWindow = window.open('', '_blank');
+            
+            if (newWindow) {
+                newWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="ar" dir="rtl">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>حفظ الصورة النهائية</title>
+                        <style>
+                            body { 
+                                background-color: #0f172a; 
+                                color: white; 
+                                display: flex; 
+                                flex-direction: column; 
+                                align-items: center; 
+                                justify-content: center; 
+                                min-height: 100vh; 
+                                margin: 0; 
+                                font-family: sans-serif;
+                                padding: 20px;
+                                text-align: center;
+                                box-sizing: border-box;
+                            }
+                            img { 
+                                max-width: 100%; 
+                                height: auto; 
+                                border-radius: 12px; 
+                                box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+                                margin-top: 20px;
+                            }
+                            .alert {
+                                background: #10b981;
+                                color: white;
+                                padding: 15px 20px;
+                                border-radius: 12px;
+                                font-weight: bold;
+                                font-size: 1.1rem;
+                                line-height: 1.6;
+                                max-width: 90%;
+                                border: 2px solid #059669;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="alert">
+                            ✅ تم فتح الصورة بنجاح!<br>
+                            اضغط مطولاً (Long Press) بأصبعك على الصورة بالأسفل ثم اختر "حفظ الصورة" أو "Download Image".
+                        </div>
+                        <img src="${dataUrl}" alt="Watermarked Image">
+                    </body>
+                    </html>
+                `);
+                newWindow.document.close();
+            } else {
+                // كحل بديل أخير إذا كان التطبيق يمنع النوافذ المنبثقة تماماً
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                link.download = 'khaledmohyalden-watermark.png';
+                link.click();
+                alert("لم يتمكن التطبيق من فتح نافذة جديدة. يرجى الضغط مطولاً على الصورة الظاهرة بالشاشة نفسها لحفظها.");
+            }
+        }
+
+        // دالة التحميل المعدلة (محاولة المشاركة ثم فتح نافذة)
         function downloadImage() {
             const canvas = document.getElementById('watermarkCanvas');
+            const dataUrl = canvas.toDataURL('image/png', 1.0);
 
-            // محاولة استخدام واجهة المشاركة الأصلية للموبايل (Share API)
+            // محاولة استخدام واجهة المشاركة الأصلية للموبايل (Share API) - ممتازة للـ APK
             canvas.toBlob(function(blob) {
                 const file = new File([blob], 'khaled-watermark.png', { type: 'image/png' });
 
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    // فتح نافذة المشاركة الخاصة بالأندرويد
                     navigator.share({
                         files: [file],
                         title: 'الصورة النهائية',
                         text: 'تم إضافة العلامة المائية عبر محلل فيسبوك'
                     }).catch((error) => {
-                        // إذا أغلق المستخدم النافذة أو حدث خطأ
-                        alert("لحفظ الصورة داخل التطبيق:\nيرجى 'الضغط مطولاً' (Long Press) بأصبعك على الصورة، ثم اختر 'حفظ الصورة' (Save Image).");
+                        // إذا أغلق المستخدم النافذة أو لم تنجح المشاركة، نلجأ لفتح النافذة المنبثقة
+                        openImageInNewTab(dataUrl);
                     });
                 } else {
-                    // الطريقة التقليدية للمتصفحات العادية كحل احتياطي
-                    try {
-                        const link = document.createElement('a');
-                        link.download = 'khaledmohyalden-watermark.png';
-                        link.href = canvas.toDataURL('image/png', 1.0);
-                        link.click();
-                    } catch(e) {}
-                    
-                    // تنبيه فوري لمستخدمي الـ APK
-                    alert("لحفظ الصورة داخل التطبيق:\nيرجى 'الضغط مطولاً' (Long Press) بأصبعك على الصورة، ثم اختر 'حفظ الصورة' (Save Image).");
+                    // المتصفح لا يدعم المشاركة، افتح النافذة المنبثقة فوراً
+                    openImageInNewTab(dataUrl);
                 }
             }, 'image/png', 1.0);
         }
